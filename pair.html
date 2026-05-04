@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>✞ ALMEER MD — SESSION GENERATOR ✞</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+    <style>
+      :root {
+        --c:   #00f5ff;
+        --m:   #ff00ff;
+        --g:   #00ff88;
+        --bg:  #050510;
+        --bg2: #0a0a1a;
+        --card: rgba(0,245,255,0.03);
+        --bd:  rgba(0,245,255,0.18);
+        --bd2: rgba(255,0,255,0.18);
+        --err: #ff3355;
+      }
+
+      * { margin:0; padding:0; box-sizing:border-box; }
+
+      body {
+        font-family: 'Orbitron', monospace;
+        background: var(--bg);
+        color: var(--c);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+        overflow-x: hidden;
+      }
+
+      /* ── Matrix canvas ── */
+      canvas {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        opacity: .10;
+        pointer-events: none;
+      }
+
+      /* ── Scanlines overlay ── */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0,245,255,0.015) 2px,
+          rgba(0,245,255,0.015) 4px
+        );
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .container {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 460px;
+        background: var(--card);
+        border-radius: 16px;
+        padding: 36px 30px 28px;
+        border: 1px solid var(--bd);
+        box-shadow:
+          0 0 60px rgba(0,245,255,0.07),
+          0 0 120px rgba(255,0,255,0.04),
+          inset 0 1px 0 rgba(0,245,255,0.12);
+        backdrop-filter: blur(18px);
+      }
+
+      /* top shimmer line */
+      .container::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--c), var(--m), transparent);
+        border-radius: 16px 16px 0 0;
+      }
+
+      /* glow aura */
+      .container::after {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        border-radius: 17px;
+        background: linear-gradient(135deg, var(--c), var(--m));
+        z-index: -1;
+        opacity: .07;
+        filter: blur(18px);
+      }
+
+      /* ── Header ── */
+      .header { text-align: center; margin-bottom: 28px; }
+
+      .logo {
+        width: 82px;
+        height: 82px;
+        margin: 0 auto 18px;
+        background: linear-gradient(135deg, rgba(0,245,255,0.12), rgba(255,0,255,0.12));
+        border: 1px solid var(--bd);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 34px;
+        color: var(--c);
+        box-shadow: 0 0 30px rgba(0,245,255,0.2), 0 0 60px rgba(255,0,255,0.08);
+        transition: all .4s ease;
+        cursor: default;
+      }
+      .logo:hover {
+        box-shadow: 0 0 50px rgba(0,245,255,0.35), 0 0 90px rgba(255,0,255,0.15);
+        transform: scale(1.06) rotate(3deg);
+        border-color: var(--c);
+      }
+
+      .title {
+        font-size: 1.3rem;
+        font-weight: 900;
+        letter-spacing: 2px;
+        background: linear-gradient(135deg, var(--c), var(--m));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: none;
+        margin-bottom: 5px;
+      }
+
+      .subtitle {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: .65rem;
+        color: rgba(0,245,255,0.5);
+        letter-spacing: 3px;
+        margin-bottom: 18px;
+      }
+
+      /* pulse dot */
+      .pulse {
+        display: inline-block;
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: var(--g);
+        box-shadow: 0 0 8px var(--g);
+        margin-right: 6px;
+        vertical-align: middle;
+        animation: blink 1.4s infinite;
+      }
+      @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+      /* ── Social icons ── */
+      .social-icons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 22px;
+      }
+
+      .social-icons a {
+        width: 44px; height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        text-decoration: none;
+        border: 1px solid var(--bd);
+        background: rgba(0,245,255,0.03);
+        transition: all .3s ease;
+      }
+      .social-icons a.yt    { color: #ff4444; }
+      .social-icons a.tg    { color: #00aaff; }
+      .social-icons a.wa    { color: #25D366; }
+      .social-icons a.gh    { color: #ffffff; }
+      .social-icons a:hover {
+        transform: translateY(-3px) scale(1.1);
+        border-color: var(--c);
+        box-shadow: 0 0 16px rgba(0,245,255,0.25);
+        background: rgba(0,245,255,0.07);
+      }
+
+      /* ── Toggle ── */
+      .toggle-container {
+        display: flex;
+        background: rgba(0,245,255,0.03);
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 24px;
+        gap: 4px;
+      }
+
+      .toggle-option {
+        flex: 1;
+        padding: 12px 8px;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 7px;
+        font-family: 'Orbitron', monospace;
+        font-size: .62rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: rgba(0,245,255,0.4);
+        transition: all .3s ease;
+      }
+      .toggle-option.active {
+        background: linear-gradient(135deg, rgba(0,245,255,0.14), rgba(255,0,255,0.10));
+        color: var(--c);
+        border: 1px solid var(--bd);
+        box-shadow: 0 0 14px rgba(0,245,255,0.15);
+        text-shadow: 0 0 8px var(--c);
+      }
+      .toggle-option:not(.active):hover {
+        color: rgba(0,245,255,0.7);
+        background: rgba(0,245,255,0.05);
+      }
+      .toggle-option i { margin-right: 6px; }
+
+      /* ── Input ── */
+      .input-group { margin-bottom: 20px; }
+      .input-group.hidden { display: none; }
+
+      .input-label {
+        display: block;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: .6rem;
+        letter-spacing: 2px;
+        color: var(--m);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+
+      .input-field {
+        width: 100%;
+        padding: 13px 16px;
+        background: rgba(0,245,255,0.04);
+        border: 1px solid var(--bd);
+        border-radius: 8px;
+        color: #fff;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: .92rem;
+        outline: none;
+        transition: all .25s ease;
+      }
+      .input-field::placeholder { color: rgba(0,245,255,0.28); }
+      .input-field:focus {
+        border-color: var(--c);
+        box-shadow: 0 0 14px rgba(0,245,255,0.2);
+        background: rgba(0,245,255,0.06);
+      }
+
+      /* ── Buttons ── */
+      .generate-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, rgba(0,245,255,0.12), rgba(255,0,255,0.08));
+        border: 1px solid var(--c);
+        border-radius: 8px;
+        color: var(--c);
+        font-family: 'Orbitron', monospace;
+        font-size: .78rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: all .3s ease;
+        text-shadow: 0 0 8px var(--c);
+        margin-bottom: 18px;
+        position: relative;
+        overflow: hidden;
+      }
+      .generate-btn::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0,245,255,0.18), transparent);
+        transition: .5s;
+      }
+      .generate-btn:hover {
+        box-shadow: 0 0 28px rgba(0,245,255,0.3), 0 0 50px rgba(255,0,255,0.1);
+        background: linear-gradient(135deg, rgba(0,245,255,0.2), rgba(255,0,255,0.14));
+        transform: translateY(-2px);
+      }
+      .generate-btn:hover::before { left: 100%; }
+      .generate-btn.hidden { display: none; }
+      .generate-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+      .copy-btn {
+        width: 100%;
+        padding: 13px;
+        background: rgba(255,0,255,0.05);
+        border: 1px solid var(--m);
+        border-radius: 8px;
+        color: var(--m);
+        font-family: 'Orbitron', monospace;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        cursor: pointer;
+        transition: all .3s ease;
+        text-shadow: 0 0 8px var(--m);
+        margin-top: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .copy-btn:hover {
+        box-shadow: 0 0 22px rgba(255,0,255,0.25);
+        background: rgba(255,0,255,0.1);
+        transform: translateY(-2px);
+      }
+
+      /* ── Code display ── */
+      .code-display {
+        background: rgba(0,245,255,0.04);
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        min-height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Orbitron', monospace;
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        color: var(--c);
+        box-shadow: inset 0 0 20px rgba(0,245,255,0.04);
+      }
+
+      /* ── QR display ── */
+      .qr-display {
+        background: rgba(0,245,255,0.03);
+        border: 1px solid var(--bd);
+        border-radius: 12px;
+        padding: 28px;
+        text-align: center;
+        margin-bottom: 16px;
+        display: none;
+      }
+
+      .qr-image {
+        max-width: 260px;
+        max-height: 260px;
+        margin: 0 auto 16px;
+        border-radius: 12px;
+        border: 3px solid var(--bd);
+        box-shadow: 0 0 30px rgba(0,245,255,0.15);
+        background: white;
+        padding: 12px;
+        display: block;
+      }
+
+      .qr-instructions {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: .65rem;
+        color: rgba(0,245,255,0.55);
+        line-height: 1.9;
+        letter-spacing: 1px;
+      }
+
+      /* ── Status messages ── */
+      .success-message {
+        color: var(--g);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: .85rem;
+        text-shadow: 0 0 10px var(--g);
+        letter-spacing: 2px;
+      }
+
+      .error-message {
+        color: var(--err);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: .75rem;
+        font-family: 'Share Tech Mono', monospace;
+        text-shadow: 0 0 8px rgba(255,51,85,.4);
+        letter-spacing: 1px;
+      }
+
+      /* ── Loading ── */
+      .loading {
+        display: none;
+        text-align: center;
+        margin: 18px 0;
+      }
+      .loading i {
+        font-size: 26px;
+        color: var(--c);
+        filter: drop-shadow(0 0 8px var(--c));
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+
+      /* ── Footer ── */
+      .footer {
+        text-align: center;
+        margin-top: 22px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(0,245,255,0.08);
+      }
+      .footer p {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: .55rem;
+        color: rgba(0,245,255,0.22);
+        letter-spacing: 2px;
+        transition: color .3s;
+      }
+      .footer p:hover { color: rgba(0,245,255,0.5); }
+
+      /* ── Pulse anim on code box when code shown ── */
+      @keyframes codePulse {
+        0%,100% { box-shadow: inset 0 0 20px rgba(0,245,255,0.04), 0 0 20px rgba(0,245,255,0.08); }
+        50%      { box-shadow: inset 0 0 30px rgba(0,245,255,0.08), 0 0 40px rgba(0,245,255,0.18); }
+      }
+      .code-display.lit {
+        animation: codePulse 2s ease-in-out infinite;
+        border-color: var(--c);
+      }
+
+      /* ── Music toggle button ── */
+      .music-btn {
+        position: fixed;
+        bottom: 22px;
+        right: 22px;
+        z-index: 999;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(0,245,255,0.12), rgba(255,0,255,0.12));
+        border: 1px solid var(--c);
+        color: var(--c);
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 18px rgba(0,245,255,0.25);
+        transition: all .3s ease;
+        animation: musicPulse 2s ease-in-out infinite;
+      }
+      .music-btn:hover {
+        transform: scale(1.12);
+        box-shadow: 0 0 30px rgba(0,245,255,0.45);
+      }
+      .music-btn.muted {
+        border-color: var(--m);
+        color: var(--m);
+        box-shadow: 0 0 18px rgba(255,0,255,0.2);
+        animation: none;
+        opacity: .6;
+      }
+      @keyframes musicPulse {
+        0%,100% { box-shadow: 0 0 18px rgba(0,245,255,0.25); }
+        50%      { box-shadow: 0 0 32px rgba(0,245,255,0.5), 0 0 60px rgba(255,0,255,0.15); }
+      }
+
+      @media (max-width: 480px) {
+        .container { padding: 26px 18px 20px; }
+        .title { font-size: 1.05rem; }
+        .code-display { font-size: .9rem; }
+        .qr-image { max-width: 220px; max-height: 220px; }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="cv"></canvas>
+
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <div class="logo"><i class="fas fa-robot"></i></div>
+        <h1 class="title">✞ ALMEER MD ✞</h1>
+        <p class="subtitle"><span class="pulse"></span>SESSION GENERATOR — ONLINE</p>
+
+        <div class="social-icons">
+          <a href="https://youtube.com" target="_blank" class="yt"><i class="fab fa-youtube"></i></a>
+          <a href="https://t.me" target="_blank" class="tg"><i class="fab fa-telegram"></i></a>
+          <a href="https://wa.me" target="_blank" class="wa"><i class="fab fa-whatsapp"></i></a>
+          <a href="https://github.com" target="_blank" class="gh"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+
+      <!-- Toggle -->
+      <div class="toggle-container">
+        <div class="toggle-option active" data-mode="pair">
+          <i class="fas fa-key"></i>PAIR CODE
+        </div>
+        <div class="toggle-option" data-mode="qr">
+          <i class="fas fa-qrcode"></i>QR CODE
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div class="input-group" id="inputGroup">
+        <label class="input-label">WhatsApp number with country code</label>
+        <input
+          type="text"
+          id="mobileNumber"
+          class="input-field"
+          placeholder="254712345678  (no + sign)"
+        />
+      </div>
+
+      <!-- Generate button -->
+      <button class="generate-btn" id="submit">
+        <i class="fas fa-bolt"></i>&nbsp; GENERATE PAIRING CODE
+      </button>
+
+      <!-- Loading -->
+      <div class="loading" id="loading">
+        <i class="fas fa-spinner"></i>
+      </div>
+
+      <!-- Code display -->
+      <div class="code-display" id="codeDisplay">
+        Your pairing code will appear here
+      </div>
+
+      <!-- QR display -->
+      <div class="qr-display" id="qrDisplay">
+        <img id="qrImage" class="qr-image" src="" alt="QR Code" />
+        <div class="qr-instructions" id="qrInstructions">
+          Scan with WhatsApp → Linked Devices → Link a Device
+        </div>
+      </div>
+
+      <!-- Copy button -->
+      <button class="copy-btn" id="copy" onclick="copyCode()">
+        <i class="fas fa-copy"></i> COPY CODE
+      </button>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>© 2026 ALMEER MD · SIDER44 · ALMEER BRAND · ALL RIGHTS RESERVED</p>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+    <script>
+      // ── Matrix rain ──────────────────────────────────────────────────────
+      const cv = document.getElementById('cv')
+      const cx = cv.getContext('2d')
+      const ch = 'アイウエオALMEERMD✞✠01ABCDEF✦★'
+      const fs = 13
+      let dr = []
+      function resize() { cv.width = innerWidth; cv.height = innerHeight }
+      function initDr() { dr = Array(Math.floor(cv.width / fs)).fill(1) }
+      resize(); initDr()
+      window.onresize = () => { resize(); initDr() }
+      setInterval(() => {
+        cx.fillStyle = 'rgba(5,5,16,0.05)'
+        cx.fillRect(0, 0, cv.width, cv.height)
+        cx.fillStyle = '#00f5ff'
+        cx.font = fs + 'px monospace'
+        dr.forEach((y, i) => {
+          cx.fillText(ch[Math.floor(Math.random() * ch.length)], i * fs, y * fs)
+          if (y * fs > cv.height && Math.random() > .975) dr[i] = 0
+          dr[i]++
+        })
+      }, 40)
+
+      // ── Toggle ───────────────────────────────────────────────────────────
+      let currentMode = 'pair'
+      document.querySelectorAll('.toggle-option').forEach(opt => {
+        opt.addEventListener('click', function () {
+          const mode = this.dataset.mode
+          if (mode === currentMode) return
+          document.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'))
+          this.classList.add('active')
+          currentMode = mode
+
+          const btn = document.getElementById('submit')
+          const ig  = document.getElementById('inputGroup')
+          const cd  = document.getElementById('codeDisplay')
+          const qd  = document.getElementById('qrDisplay')
+
+          if (mode === 'pair') {
+            btn.innerHTML = '<i class="fas fa-bolt"></i>&nbsp; GENERATE PAIRING CODE'
+            btn.classList.remove('hidden')
+            ig.classList.remove('hidden')
+            cd.innerHTML = 'Your pairing code will appear here'
+            cd.classList.remove('lit')
+            cd.style.display = 'flex'
+            qd.style.display = 'none'
+          } else {
+            btn.classList.add('hidden')
+            ig.classList.add('hidden')
+            cd.innerHTML = ''
+            cd.style.display = 'none'
+            qd.style.display = 'none'
+            generateQRCode()
+          }
+        })
+      })
+
+      // ── QR code fetch ────────────────────────────────────────────────────
+      async function generateQRCode() {
+        const cd = document.getElementById('codeDisplay')
+        const qd = document.getElementById('qrDisplay')
+        const ld = document.getElementById('loading')
+        ld.style.display = 'block'
+        cd.style.display = 'none'
+        qd.style.display = 'none'
+        try {
+          const r = await axios('/qr')
+          if (r.data.qr) {
+            document.getElementById('qrImage').src = r.data.qr
+            document.getElementById('qrInstructions').innerHTML =
+              (r.data.instructions || []).join('<br>')
+            qd.style.display = 'block'
+          } else {
+            cd.innerHTML = '<div class="error-message"><i class="fas fa-exclamation-circle"></i>&nbsp;Failed to generate QR code</div>'
+            cd.style.display = 'flex'
+          }
+        } catch (e) {
+          cd.innerHTML = '<div class="error-message"><i class="fas fa-exclamation-circle"></i>&nbsp;Error generating QR. Please retry.</div>'
+          cd.style.display = 'flex'
+        } finally {
+          ld.style.display = 'none'
+        }
+      }
+
+      // ── Pair code fetch ──────────────────────────────────────────────────
+      document.getElementById('submit').addEventListener('click', async (e) => {
+        e.preventDefault()
+        const num = document.getElementById('mobileNumber').value.trim()
+        const btn = document.getElementById('submit')
+        const cd  = document.getElementById('codeDisplay')
+        const qd  = document.getElementById('qrDisplay')
+        const ld  = document.getElementById('loading')
+
+        if (!num || num.replace(/\D/g,'').length < 7) {
+          cd.classList.remove('lit')
+          cd.innerHTML = '<div class="error-message"><i class="fas fa-exclamation-circle"></i>&nbsp;Enter a valid number with country code</div>'
+          cd.style.display = 'flex'
+          return
+        }
+
+        btn.disabled = true
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>&nbsp; REQUESTING...'
+        ld.style.display = 'block'
+        cd.innerHTML = ''; cd.classList.remove('lit'); cd.style.display = 'none'
+        qd.style.display = 'none'
+
+        try {
+          const r = await axios(`/pair?number=${num.replace(/[^0-9]/g,'')}`)
+          const code = r.data.code || 'Service Unavailable'
+          if (code === 'Service Unavailable') {
+            cd.classList.remove('lit')
+            cd.innerHTML = '<div class="error-message"><i class="fas fa-exclamation-circle"></i>&nbsp;Service Unavailable — restart the bot</div>'
+          } else {
+            cd.classList.add('lit')
+            cd.innerHTML = `<div class="success-message"><i class="fas fa-check-circle"></i>&nbsp;${code}</div>`
+          }
+          cd.style.display = 'flex'
+        } catch (err) {
+          cd.classList.remove('lit')
+          cd.innerHTML = '<div class="error-message"><i class="fas fa-exclamation-circle"></i>&nbsp;Network error — is the bot running?</div>'
+          cd.style.display = 'flex'
+        } finally {
+          ld.style.display = 'none'
+          btn.disabled = false
+          btn.innerHTML = '<i class="fas fa-bolt"></i>&nbsp; GENERATE PAIRING CODE'
+        }
+      })
+
+      // ── Copy ─────────────────────────────────────────────────────────────
+      function copyCode() {
+        const text = document.getElementById('codeDisplay').innerText
+          .replace('CODE: ','').replace('✓','').trim()
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.getElementById('copy')
+          const orig = btn.innerHTML
+          btn.innerHTML = '<i class="fas fa-check"></i>&nbsp;COPIED!'
+          setTimeout(() => { btn.innerHTML = orig }, 2000)
+        }).catch(() => alert('Copy failed — please copy manually'))
+      }
+
+      // Enter key shortcut
+      document.getElementById('mobileNumber').addEventListener('keypress', e => {
+        if (e.key === 'Enter') document.getElementById('submit').click()
+      })
+    </script>
+    <!-- Background music -->
+    <audio id="bgMusic" loop>
+      <source src="https://zygotic-blue-efg1tpd0hh.edgeone.app/" type="audio/mpeg"/>
+    </audio>
+
+    <!-- Floating music toggle button -->
+    <button class="music-btn" id="musicBtn" title="Toggle music" onclick="toggleMusic()">
+      <i class="fas fa-music"></i>
+    </button>
+
+    <script>
+      const audio    = document.getElementById('bgMusic')
+      const musicBtn = document.getElementById('musicBtn')
+      let   playing  = false
+
+      // Try autoplay on first user interaction (browsers block silent autoplay)
+      async function tryPlay() {
+        try {
+          audio.volume = 0.5
+          await audio.play()
+          playing = true
+          musicBtn.classList.remove('muted')
+          musicBtn.innerHTML = '<i class="fas fa-music"></i>'
+        } catch (e) {
+          // Autoplay blocked — wait for user gesture
+          playing = false
+          musicBtn.classList.add('muted')
+          musicBtn.innerHTML = '<i class="fas fa-volume-mute"></i>'
+        }
+      }
+
+      // Autoplay attempt on load
+      window.addEventListener('load', () => { tryPlay() })
+
+      // Also try on first any click anywhere (unblocks autoplay policy)
+      document.addEventListener('click', function startOnClick() {
+        if (!playing) tryPlay()
+        document.removeEventListener('click', startOnClick)
+      }, { once: true })
+
+      function toggleMusic() {
+        if (playing) {
+          audio.pause()
+          playing = false
+          musicBtn.classList.add('muted')
+          musicBtn.innerHTML = '<i class="fas fa-volume-mute"></i>'
+        } else {
+          audio.play().then(() => {
+            playing = true
+            musicBtn.classList.remove('muted')
+            musicBtn.innerHTML = '<i class="fas fa-music"></i>'
+          }).catch(() => {})
+        }
+      }
+    </script>
+  </body>
+</html>
