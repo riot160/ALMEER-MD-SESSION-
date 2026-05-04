@@ -149,7 +149,7 @@ const caption = `
 await sock.sendMessage(
   jid,
   {
-    image: { url: "https://files.catbox.moe/16i1l7.jpg" },
+    image: { url: "https://files.catbox.moe/0vbynh.png" },
     caption,
     contextInfo: {
       mentionedJid: [jid],
